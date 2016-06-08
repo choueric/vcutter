@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>vcutterClass</class>
+ <widget class="QMainWindow" name="vcutterClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1089</width>
+    <height>718</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>vcutter</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QPushButton" name="getInfoBtn">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>60</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>获取视频信息</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="logWidget">
+    <property name="geometry">
+     <rect>
+      <x>595</x>
+      <y>10</y>
+      <width>481</width>
+      <height>661</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clearLogBtn">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>680</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>清除日志</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="inputBtn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>600</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>选择文件</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mergeBtn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>650</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>合并</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cutBtn">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>650</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>分割</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="vcutter.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>clearLogBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>vcutterClass</receiver>
+   <slot>clearLog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>716</x>
+     <y>603</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>inputBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>vcutterClass</receiver>
+   <slot>inputFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>683</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>544</x>
+     <y>358</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>getInfoBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>vcutterClass</receiver>
+   <slot>getInfo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>146</x>
+     <y>173</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>getInfo()</slot>
+  <slot>clearLog()</slot>
+  <slot>inputFile()</slot>
+ </slots>
+</ui>

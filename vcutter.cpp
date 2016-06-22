@@ -4,6 +4,7 @@
 #include <qmessagebox.h>
 #include "log.h"
 
+#include <Windows.h>
 #include <QDir.h>
 #include <QFileDialog.h>
 
@@ -21,6 +22,13 @@ vcutter::vcutter(QWidget *parent)
 {
 	ui.setupUi(this);
 	initLog(ui.logWidget);
+	ui.progressBar->setVisible(false);
+
+	m_proc = new QProcess(this);
+	connect(m_proc, SIGNAL(finished(int, QProcess::ExitStatus)),
+		this, SLOT(procFinished(int, QProcess::ExitStatus)));
+
+	connect(&m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
 
 	disableEditUI();
 
@@ -40,6 +48,7 @@ vcutter::vcutter(QWidget *parent)
 vcutter::~vcutter()
 {
 	deinitEncoder();
+	delete m_proc;
 }
 
 void vcutter::banner()
@@ -223,4 +232,56 @@ void vcutter::inputFile()
 	getInfo();
 
 	enableEditUI();
+}
+
+/* slot */
+void vcutter::merge()
+{
+	m_progressCount = 0;
+	m_proc->start("notepad.exe");
+	okLog("启动程序合并程序");
+
+	if (m_proc->waitForStarted() == false) {
+		errLog("启动合并程序失败");
+	}
+
+	m_procType = 0;
+	ui.progressBar->setVisible(true);
+	m_timer.start(200);
+}
+
+/* slot */
+void vcutter::split()
+{
+	m_progressCount = 0;
+	m_proc->start("notepad.exe");
+	okLog("启动程序分割程序");
+
+	if (m_proc->waitForStarted() == false) {
+		errLog("启动分割程序失败");
+	}
+
+	m_procType = 1;
+	ui.progressBar->setVisible(true);
+	m_timer.start(200);
+}
+
+/* slot */
+void vcutter::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+	m_timer.stop();
+	ui.progressBar->setValue(100);
+	if (m_procType == 0)
+		QMessageBox::information(this, "合并完成", "合并已完成");
+	else if (m_procType == 1)
+		QMessageBox::information(this, "分割完成", "分割已完成");
+	ui.progressBar->setVisible(false);
+}
+
+/* timer timeout slot */
+void vcutter::timeout()
+{
+	ui.progressBar->setValue(m_progressCount++);
+	if (m_progressCount == 100)
+		m_progressCount = 1;
 }

@@ -92,6 +92,22 @@
      <string>分割</string>
     </property>
    </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>380</y>
+      <width>531</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
@@ -147,10 +163,44 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>mergeBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>vcutterClass</receiver>
+   <slot>merge()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>663</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>544</x>
+     <y>358</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cutBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>vcutterClass</receiver>
+   <slot>split()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>166</x>
+     <y>663</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>544</x>
+     <y>358</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>getInfo()</slot>
   <slot>clearLog()</slot>
   <slot>inputFile()</slot>
+  <slot>merge()</slot>
+  <slot>split()</slot>
  </slots>
 </ui>

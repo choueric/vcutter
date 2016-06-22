@@ -3,6 +3,8 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QString.h>
+#include <qtimer.h>
+#include <qprocess.h>
 #include "ui_vcutter.h"
 
 class vcutter : public QMainWindow
@@ -17,7 +19,10 @@ public slots:
 	void clearLog();
 	void getInfo();
 	void inputFile();
-
+	void merge();
+	void split();
+	void procFinished(int exitCode, QProcess::ExitStatus exitStatus);
+	void timeout();
 
 private:
 	Ui::vcutterClass ui;
@@ -26,6 +31,11 @@ private:
 	QString m_videoFile_0;
 	QString m_videoFile_1;
 	QString m_eventFile;
+
+	QProcess *m_proc;
+	QTimer m_timer;
+	int m_progressCount;
+	int m_procType;
 
 private:
 	void banner();

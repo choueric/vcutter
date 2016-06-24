@@ -7,6 +7,9 @@
 #include <qprocess.h>
 #include "ui_vcutter.h"
 
+#define FILELIST_NAME "./output/filelist"
+#define CONCAT_CMD "ffmpeg.exe -f concat -i ./output/filelist -c copy ./output/output.mkv"
+
 class vcutter : public QMainWindow
 {
 	Q_OBJECT
@@ -17,12 +20,14 @@ public:
 
 public slots:
 	void clearLog();
-	void getInfo();
+	void getVideoInfo(QString &file);
 	void inputFile();
 	void merge();
 	void split();
 	void procFinished(int exitCode, QProcess::ExitStatus exitStatus);
 	void timeout();
+	void on_read();
+	void on_readerr();
 
 private:
 	Ui::vcutterClass ui;
@@ -44,8 +49,8 @@ private:
 	bool checkFileExist(QString str);
 	void enableEditUI();
 	void disableEditUI();
-	bool initEncoder();
-	void deinitEncoder();
+	void createFilelist();
+	void deleteFilelist();
 };
 
 #endif // VCUTTER_H

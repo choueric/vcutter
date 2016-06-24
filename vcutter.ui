@@ -57,7 +57,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>600</y>
+      <y>640</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -70,7 +70,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>650</y>
+      <y>680</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -83,7 +83,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>650</y>
+      <y>680</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -95,9 +95,9 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>380</y>
-      <width>531</width>
+      <x>10</x>
+      <y>610</y>
+      <width>551</width>
       <height>23</height>
      </rect>
     </property>
@@ -106,6 +106,16 @@
     </property>
     <property name="textVisible">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="logTextEdit">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>100</y>
+      <width>521</width>
+      <height>491</height>
+     </rect>
     </property>
    </widget>
   </widget>

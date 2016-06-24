@@ -7,6 +7,10 @@
 #include <Windows.h>
 #include <QDir.h>
 #include <QFileDialog.h>
+#include <QtCore/QTextStream>
+#include <QtCore/QFile>
+#include <QtCore/QIODevice>
+#include <qcolor.h>
 
 extern "C"
 {
@@ -16,6 +20,8 @@ extern "C"
 #include "libavformat/avio.h"
 #include "libavutil/file.h"
 }
+
+#define SUBFIX ".mkv"
 
 vcutter::vcutter(QWidget *parent)
 	: QMainWindow(parent)
@@ -27,6 +33,8 @@ vcutter::vcutter(QWidget *parent)
 	m_proc = new QProcess(this);
 	connect(m_proc, SIGNAL(finished(int, QProcess::ExitStatus)),
 		this, SLOT(procFinished(int, QProcess::ExitStatus)));
+	connect(m_proc, SIGNAL(readyReadStandardError()), this, SLOT(on_readerr()));
+	connect(m_proc, SIGNAL(readyReadStandardOutput()), this, SLOT(on_read()));
 
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
 
@@ -37,17 +45,11 @@ vcutter::vcutter(QWidget *parent)
 		return;
 	}
 
-	if (initEncoder() == false) {
-		errLog("编码器初始化失败.");;
-		return;
-	}
-
 	okLog("初始化成功");
 }
 
 vcutter::~vcutter()
 {
-	deinitEncoder();
 	delete m_proc;
 }
 
@@ -56,14 +58,31 @@ void vcutter::banner()
 	infoLog("----------------------------------------------------------");
 }
 
-
-bool vcutter::initEncoder()
+void vcutter::createFilelist()
 {
-	return true;
+	QFile file;
+	QFileInfo info(m_videoFile_0);
+
+	file.setFileName(FILELIST_NAME);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		errLog("创建Filelist文件错误!");
+		return;
+	} 
+
+	QTextStream out(&file);    
+	out << "file '../input/" << info.fileName() << "'" << endl;    
+	if (m_videoFile_1 != "") {
+		QFileInfo info(m_videoFile_1);
+		out << "file '../input/" << info.fileName() << "'" << endl;
+	}
+	out.flush();
+
+	file.close();
 }
 
-void vcutter::deinitEncoder()
+void vcutter::deleteFilelist()
 {
+	QFile::remove(FILELIST_NAME);
 }
 
 void vcutter::disableEditUI()
@@ -118,7 +137,7 @@ bool vcutter::checkFileExist(QString file)
 	return true;
 }
 
-void vcutter::getInfo()
+void vcutter::getVideoInfo(QString &file)
 {
     int ret;
     AVFormatContext *pContext = NULL;
@@ -130,7 +149,7 @@ void vcutter::getInfo()
 	//avcodec_register_all();
 
 	pContext = avformat_alloc_context();
-    ret = avformat_open_input(&pContext, m_videoFile_0.toLatin1().data(), NULL, NULL);
+    ret = avformat_open_input(&pContext, file.toLatin1().data(), NULL, NULL);
 	if (ret) {
 		errLog(QString("avformat_open_input错误, ret = %1").arg(ret));
         return;
@@ -209,8 +228,8 @@ void vcutter::inputFile()
 
 	QFileInfo file(str);
 	QString prefix = file.absolutePath() + "/" + file.baseName();
-	m_videoFile_0 = prefix + ".mp4";
-	m_videoFile_1 = prefix + "_1.mp4";
+	m_videoFile_0 = prefix + SUBFIX;
+	m_videoFile_1 = prefix + "_1" + SUBFIX;
 
 	if (checkFileExist(m_videoFile_0) == false) {
 		m_videoFile_0 = "";
@@ -227,9 +246,11 @@ void vcutter::inputFile()
 	warLog(QString("    事件文件 : %1").arg(QFileInfo(m_eventFile).fileName()));
 	warLog(QString("    视频文件1: %1").arg(QFileInfo(m_videoFile_0).fileName()));
 	if (m_videoFile_1 != "")
-		warLog(QString("    时间文件2: %1").arg(QFileInfo(m_videoFile_1).fileName()));
+		warLog(QString("    视频文件2: %1").arg(QFileInfo(m_videoFile_1).fileName()));
 
-	getInfo();
+	getVideoInfo(m_videoFile_0);
+	if (m_videoFile_1 != "")
+		getVideoInfo(m_videoFile_1);
 
 	enableEditUI();
 }
@@ -237,12 +258,18 @@ void vcutter::inputFile()
 /* slot */
 void vcutter::merge()
 {
+	createFilelist();
 	m_progressCount = 0;
-	m_proc->start("notepad.exe");
-	okLog("启动程序合并程序");
+
+	QStringList args;
+	QString program = "ffmpeg.exe";
+	args << "-y" << "-safe" << "0" << "-f" << "concat" << "-i" << "./output/filelist" << "-c" << "copy" << "./output/output.mkv";
+	m_proc->start(program, args);
 
 	if (m_proc->waitForStarted() == false) {
 		errLog("启动合并程序失败");
+	} else {
+		okLog("启动合并程序成功.");
 	}
 
 	m_procType = 0;
@@ -271,10 +298,12 @@ void vcutter::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
 	m_timer.stop();
 	ui.progressBar->setValue(100);
-	if (m_procType == 0)
+	if (m_procType == 0) {
 		QMessageBox::information(this, "合并完成", "合并已完成");
-	else if (m_procType == 1)
+		//deleteFilelist();
+	} else if (m_procType == 1) {
 		QMessageBox::information(this, "分割完成", "分割已完成");
+	}
 	ui.progressBar->setVisible(false);
 }
 
@@ -284,4 +313,20 @@ void vcutter::timeout()
 	ui.progressBar->setValue(m_progressCount++);
 	if (m_progressCount == 100)
 		m_progressCount = 1;
+}
+
+void vcutter::on_read()
+{
+	QProcess *pProces = (QProcess *)sender();
+	QString result = pProces->readAllStandardOutput();
+	//ui.logTextEdit->setTextColor(Qt::black);
+	ui.logTextEdit->append(result);
+}
+
+void vcutter::on_readerr()
+{
+	QProcess *pProces = (QProcess *)sender();
+	QString result = pProces->readAllStandardError();
+	//ui.logTextEdit->setTextColor(Qt::red);
+	ui.logTextEdit->append(result);
 }

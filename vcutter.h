@@ -42,6 +42,7 @@ private:
 	QTimer m_timer;
 	int m_progressCount;
 	bool m_isMerge;
+	bool m_needMerge;
 
 	cuttime m_cuttime;
 	Ui::vcutterClass ui;

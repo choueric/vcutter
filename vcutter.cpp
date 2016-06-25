@@ -95,9 +95,10 @@ void vcutter::disableEditUI()
 
 void vcutter::enableEditUI()
 {
-	ui.cutBtn->setEnabled(true);
-	if (m_videoFile_1 != "")
+	if (m_needMerge)
 		ui.mergeBtn->setEnabled(true);
+	else 
+		ui.cutBtn->setEnabled(true);
 }
 
 bool vcutter::checkDir(QString &sdir)
@@ -239,8 +240,8 @@ void vcutter::inputFile()
 
 	if (checkFileExist(m_videoFile_1) == false) {
 		m_videoFile_1 = "";
-	}
-	else {
+	} else {
+		m_needMerge = true;
 		m_inputVideoFile = "./output/output.mkv";
 	}
 
@@ -271,7 +272,7 @@ void vcutter::merge()
 
 	QStringList args;
 	QString program = "ffmpeg.exe";
-	args << "-y" << "-f" << "concat" << "-i" << "./output/filelist" << "-c" << "copy" << m_inputVideoFile;
+	args << "-y" << "-safe" << "0" << "-f" << "concat" << "-i" << "./output/filelist" << "-c" << "copy" << m_inputVideoFile;
 	m_proc->start(program, args);
 
 	if (m_proc->waitForStarted() == false) {
@@ -334,6 +335,8 @@ void vcutter::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 		QMessageBox::information(this, "合并完成", "合并已完成");
 		ui.progressBar->setVisible(false);
 		deleteFilelist();
+		m_needMerge = false;
+		ui.cutBtn->setEnabled(true);
 	}
 }
 

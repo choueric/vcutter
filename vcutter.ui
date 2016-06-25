@@ -95,10 +95,10 @@
    <widget class="QTextEdit" name="logTextEdit">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>100</y>
-      <width>521</width>
-      <height>491</height>
+      <x>10</x>
+      <y>10</y>
+      <width>551</width>
+      <height>581</height>
      </rect>
     </property>
    </widget>

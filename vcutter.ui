@@ -14,22 +14,6 @@
    <string>vcutter</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="getInfoBtn">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>60</y>
-      <width>93</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>获取视频信息</string>
-    </property>
-   </widget>
    <widget class="QListWidget" name="logWidget">
     <property name="geometry">
      <rect>
@@ -154,22 +138,6 @@
     <hint type="destinationlabel">
      <x>544</x>
      <y>358</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>getInfoBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>vcutterClass</receiver>
-   <slot>getInfo()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>146</x>
-     <y>173</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>199</y>
     </hint>
    </hints>
   </connection>

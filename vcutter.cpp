@@ -4,7 +4,6 @@
 #include <qmessagebox.h>
 #include "log.h"
 
-#include <Windows.h>
 #include <QDir.h>
 #include <QFileDialog.h>
 #include <QtCore/QTextStream>
@@ -22,6 +21,7 @@ extern "C"
 }
 
 #define SUBFIX ".mkv"
+#define FILELIST_NAME "./output/filelist"
 
 vcutter::vcutter(QWidget *parent)
 	: QMainWindow(parent)
@@ -89,14 +89,12 @@ void vcutter::disableEditUI()
 {
 	ui.inputBtn->setEnabled(true);
 
-	ui.getInfoBtn->setVisible(false);
 	ui.mergeBtn->setEnabled(false);
 	ui.cutBtn->setEnabled(false);
 }
 
 void vcutter::enableEditUI()
 {
-	//ui.getInfoBtn->setEnabled(true);
 	ui.cutBtn->setEnabled(true);
 	if (m_videoFile_1 != "")
 		ui.mergeBtn->setEnabled(true);
@@ -219,6 +217,7 @@ void vcutter::inputFile()
 	m_eventFile = "";
 	m_videoFile_0 = "";
 	m_videoFile_1 = "";
+	m_inputVideoFile = "";
 
 	QString str = QFileDialog::getOpenFileName(
 			this, "选择事件log文件", m_inDir, "*.log");
@@ -236,9 +235,13 @@ void vcutter::inputFile()
 		errLog(QString("视频文件[%1]不存在.").arg(m_videoFile_0));
 		return;
 	}
+	m_inputVideoFile = "./input/" + QFileInfo(m_videoFile_0).fileName();
 
 	if (checkFileExist(m_videoFile_1) == false) {
 		m_videoFile_1 = "";
+	}
+	else {
+		m_inputVideoFile = "./output/output.mkv";
 	}
 
 	m_eventFile = str;
@@ -247,10 +250,15 @@ void vcutter::inputFile()
 	warLog(QString("    视频文件1: %1").arg(QFileInfo(m_videoFile_0).fileName()));
 	if (m_videoFile_1 != "")
 		warLog(QString("    视频文件2: %1").arg(QFileInfo(m_videoFile_1).fileName()));
+	warLog(QString("    输入的视频文件: %1").arg(m_inputVideoFile));
 
 	getVideoInfo(m_videoFile_0);
 	if (m_videoFile_1 != "")
 		getVideoInfo(m_videoFile_1);
+
+	// parse event_log file.
+	m_cuttime.input(m_eventFile);
+	m_cuttime.showEvents();
 
 	enableEditUI();
 }
@@ -263,7 +271,7 @@ void vcutter::merge()
 
 	QStringList args;
 	QString program = "ffmpeg.exe";
-	args << "-y" << "-safe" << "0" << "-f" << "concat" << "-i" << "./output/filelist" << "-c" << "copy" << "./output/output.mkv";
+	args << "-y" << "-f" << "concat" << "-i" << "./output/filelist" << "-c" << "copy" << m_inputVideoFile;
 	m_proc->start(program, args);
 
 	if (m_proc->waitForStarted() == false) {
@@ -272,39 +280,61 @@ void vcutter::merge()
 		okLog("启动合并程序成功.");
 	}
 
-	m_procType = 0;
+	m_isMerge = true;
 	ui.progressBar->setVisible(true);
 	m_timer.start(200);
+}
+
+void vcutter::splitOne(int offset, int duration, QString output)
+{
+	infoLog(QString("start: %1, duration: %2, output: %3").arg(offset).arg(duration).arg(output));
+	QStringList args;
+	QString program = "ffmpeg.exe";
+	args << "-y" << 
+			"-i" << m_inputVideoFile <<
+		    "-ss" << QString::number(offset, 10) <<
+		    "-t" << QString::number(duration, 10) <<
+		    "-vcodec" << "copy" << "-acodec" << "copy" << output;
+	m_proc->start(program, args);
+
+	if (m_proc->waitForStarted() == false) {
+		errLog("启动合并程序失败");
+	} else {
+		okLog("启动合并程序成功.");
+	}
+
+	m_proc->waitForFinished(-1);
 }
 
 /* slot */
 void vcutter::split()
 {
-	m_progressCount = 0;
-	m_proc->start("notepad.exe");
-	okLog("启动程序分割程序");
-
-	if (m_proc->waitForStarted() == false) {
-		errLog("启动分割程序失败");
-	}
-
-	m_procType = 1;
 	ui.progressBar->setVisible(true);
-	m_timer.start(200);
+	m_isMerge = false;
+
+	int count = m_cuttime.eventCount();
+	ui.progressBar->setMinimum(0);
+	ui.progressBar->setMaximum(count);
+
+	for (int i = 0; i < count; i++) {
+		splitOne(m_cuttime.getSSArg(i), DURATION, m_cuttime.getOutuptName(i));
+		ui.progressBar->setValue(i);
+		qApp->processEvents();
+	}
+	ui.progressBar->setValue(count);
+	QMessageBox::information(this, "分割完成", "分割已完成");
 }
 
 /* slot */
 void vcutter::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-	m_timer.stop();
-	ui.progressBar->setValue(100);
-	if (m_procType == 0) {
+	if (m_isMerge) {
+		m_timer.stop();
+		ui.progressBar->setValue(100);
 		QMessageBox::information(this, "合并完成", "合并已完成");
-		//deleteFilelist();
-	} else if (m_procType == 1) {
-		QMessageBox::information(this, "分割完成", "分割已完成");
+		ui.progressBar->setVisible(false);
+		deleteFilelist();
 	}
-	ui.progressBar->setVisible(false);
 }
 
 /* timer timeout slot */
@@ -319,7 +349,6 @@ void vcutter::on_read()
 {
 	QProcess *pProces = (QProcess *)sender();
 	QString result = pProces->readAllStandardOutput();
-	//ui.logTextEdit->setTextColor(Qt::black);
 	ui.logTextEdit->append(result);
 }
 
@@ -327,6 +356,5 @@ void vcutter::on_readerr()
 {
 	QProcess *pProces = (QProcess *)sender();
 	QString result = pProces->readAllStandardError();
-	//ui.logTextEdit->setTextColor(Qt::red);
 	ui.logTextEdit->append(result);
 }

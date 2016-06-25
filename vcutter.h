@@ -1,14 +1,15 @@
 #ifndef VCUTTER_H
 #define VCUTTER_H
 
+#include <Windows.h>
 #include <QtWidgets/QMainWindow>
 #include <QString.h>
 #include <qtimer.h>
 #include <qprocess.h>
 #include "ui_vcutter.h"
 
-#define FILELIST_NAME "./output/filelist"
-#define CONCAT_CMD "ffmpeg.exe -f concat -i ./output/filelist -c copy ./output/output.mkv"
+#include "cuttime.h"
+
 
 class vcutter : public QMainWindow
 {
@@ -30,17 +31,20 @@ public slots:
 	void on_readerr();
 
 private:
-	Ui::vcutterClass ui;
 	QString m_inDir;
 	QString m_outDir;
 	QString m_videoFile_0;
 	QString m_videoFile_1;
 	QString m_eventFile;
+	QString m_inputVideoFile;
 
 	QProcess *m_proc;
 	QTimer m_timer;
 	int m_progressCount;
-	int m_procType;
+	bool m_isMerge;
+
+	cuttime m_cuttime;
+	Ui::vcutterClass ui;
 
 private:
 	void banner();
@@ -51,6 +55,7 @@ private:
 	void disableEditUI();
 	void createFilelist();
 	void deleteFilelist();
+	void splitOne(int offset, int duration, QString output);
 };
 
 #endif // VCUTTER_H

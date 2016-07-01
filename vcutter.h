@@ -29,6 +29,7 @@ public slots:
 	void timeout();
 	void on_read();
 	void on_readerr();
+	void offsetChanged(int index);
 
 private:
 	QString m_inDir;
@@ -47,6 +48,10 @@ private:
 	cuttime m_cuttime;
 	Ui::vcutterClass ui;
 
+	int m_offset;
+
+	QString m_program;
+
 private:
 	void banner();
 	bool checkDir(QString &sdir);
@@ -56,7 +61,8 @@ private:
 	void disableEditUI();
 	void createFilelist();
 	void deleteFilelist();
-	void splitOne(int offset, int duration, QString output);
+	void splitOne(int start, int duration, QString output);
+	bool checkProgram();
 };
 
 #endif // VCUTTER_H

@@ -26,9 +26,24 @@ extern "C"
 vcutter::vcutter(QWidget *parent)
 	: QMainWindow(parent)
 {
+	m_proc = NULL;
+
 	ui.setupUi(this);
 	initLog(ui.logWidget);
 	ui.progressBar->setVisible(false);
+	for (int i = -10; i <= 10; i++)
+		ui.offsetBox->addItem(QString::number(i, 10));
+	ui.offsetBox->setCurrentIndex(ui.offsetBox->findText("0"));
+	m_offset = 0;
+
+	m_program = "./ffmpeg.exe";
+	if (checkProgram() == false) {
+		errLog("没有找到ffmpeg.exe");
+		ui.inputBtn->setEnabled(false);
+		ui.mergeBtn->setEnabled(false);
+		ui.cutBtn->setEnabled(false);
+		return;
+	}
 
 	m_proc = new QProcess(this);
 	connect(m_proc, SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -50,7 +65,8 @@ vcutter::vcutter(QWidget *parent)
 
 vcutter::~vcutter()
 {
-	delete m_proc;
+	if (m_proc != NULL)
+		delete m_proc;
 }
 
 void vcutter::banner()
@@ -88,7 +104,6 @@ void vcutter::deleteFilelist()
 void vcutter::disableEditUI()
 {
 	ui.inputBtn->setEnabled(true);
-
 	ui.mergeBtn->setEnabled(false);
 	ui.cutBtn->setEnabled(false);
 }
@@ -145,7 +160,6 @@ void vcutter::getVideoInfo(QString &file)
 	banner();
 
     av_register_all();
-	//avcodec_register_all();
 
 	pContext = avformat_alloc_context();
     ret = avformat_open_input(&pContext, file.toLatin1().data(), NULL, NULL);
@@ -159,9 +173,9 @@ void vcutter::getVideoInfo(QString &file)
 		return;
 	}
 
-	infoLog(QString("文件中包哈了[%1]个流").arg(pContext->nb_streams));
+	//infoLog(QString("文件中包哈了[%1]个流").arg(pContext->nb_streams));
 	for (int i = 0; i < pContext->nb_streams; i++) {
-		infoLog(QString("第[%1]个流的信息:").arg(i));
+		//infoLog(QString("第[%1]个流的信息:").arg(i));
 		AVStream *pStream = pContext->streams[i];
 
 		AVRational frameRate =pStream->r_frame_rate;  
@@ -172,20 +186,26 @@ void vcutter::getVideoInfo(QString &file)
 		AVMediaType avMediaType = pCodecContext->codec_type;
 		AVCodecID codecID = pCodecContext->codec_id ;
 
-		infoLog(QString("  时长: %1秒").arg(duration * av_q2d(timeBase)));
+		infoLog(QString("视频时长: %1秒").arg(duration * av_q2d(timeBase)));
+		break;
 
 		if (avMediaType == AVMEDIA_TYPE_AUDIO) {
 			infoLog("  类型: 音频");
+#if 0
 			infoLog(QString("  采样率: %1").arg(pCodecContext->sample_rate));
 			infoLog(QString("  通道数为: %1").arg(pCodecContext->channels));
+#endif
 		} else if (avMediaType == AVMEDIA_TYPE_VIDEO) {
 			int videoWidth = pCodecContext->width;
 			int videoHeight = pCodecContext->height;
 			AVSampleFormat sampleFmt = pCodecContext->sample_fmt;
 			infoLog("  类型: 视频");
+#if 0
 			infoLog(QString("  分辨率: %1 x %2 ").arg(videoWidth).arg(videoHeight));
 			infoLog(QString("  帧率为: %1/%2 fps").arg(frameRate.num).arg(frameRate.den));
+#endif
 		}
+#if 0
 		switch(codecID) {
 		case  AV_CODEC_ID_AAC:
 			infoLog("  编码格式: FAAC");
@@ -200,6 +220,7 @@ void vcutter::getVideoInfo(QString &file)
 			infoLog(QString("  编码格式未知: %1").arg(codecID));
 			break;
 		}
+#endif
 	}
     avformat_close_input(&pContext);
 }
@@ -271,9 +292,8 @@ void vcutter::merge()
 	m_progressCount = 0;
 
 	QStringList args;
-	QString program = "ffmpeg.exe";
 	args << "-y" << "-safe" << "0" << "-f" << "concat" << "-i" << "./output/filelist" << "-c" << "copy" << m_inputVideoFile;
-	m_proc->start(program, args);
+	m_proc->start(m_program, args);
 
 	if (m_proc->waitForStarted() == false) {
 		errLog("启动合并程序失败");
@@ -286,22 +306,20 @@ void vcutter::merge()
 	m_timer.start(200);
 }
 
-void vcutter::splitOne(int offset, int duration, QString output)
+void vcutter::splitOne(int start, int duration, QString output)
 {
-	infoLog(QString("start: %1, duration: %2, output: %3").arg(offset).arg(duration).arg(output));
 	QStringList args;
-	QString program = "ffmpeg.exe";
 	args << "-y" << 
 			"-i" << m_inputVideoFile <<
-		    "-ss" << QString::number(offset, 10) <<
+		    "-ss" << QString::number(start, 10) <<
 		    "-t" << QString::number(duration, 10) <<
 		    "-vcodec" << "copy" << "-acodec" << "copy" << output;
-	m_proc->start(program, args);
+	m_proc->start(m_program, args);
 
 	if (m_proc->waitForStarted() == false) {
-		errLog("启动合并程序失败");
+		errLog(QString("失败: start: %1, duration: %2, output: %3").arg(start).arg(duration).arg(output));
 	} else {
-		okLog("启动合并程序成功.");
+		okLog(QString("成功: start: %1, duration: %2, output: %3").arg(start).arg(duration).arg(output));
 	}
 
 	m_proc->waitForFinished(-1);
@@ -318,7 +336,7 @@ void vcutter::split()
 	ui.progressBar->setMaximum(count);
 
 	for (int i = 0; i < count; i++) {
-		splitOne(m_cuttime.getSSArg(i), DURATION, m_cuttime.getOutuptName(i));
+		splitOne(m_cuttime.getSSArg(i) + m_offset, DURATION, m_cuttime.getOutuptName(i));
 		ui.progressBar->setValue(i);
 		qApp->processEvents();
 	}
@@ -360,4 +378,17 @@ void vcutter::on_readerr()
 	QProcess *pProces = (QProcess *)sender();
 	QString result = pProces->readAllStandardError();
 	ui.logTextEdit->append(result);
+}
+
+void vcutter::offsetChanged(int index)
+{
+	m_offset = ui.offsetBox->itemText(index).toInt();
+}
+
+bool vcutter::checkProgram()
+{
+	QFileInfo info(m_program);
+	if (info.exists() == false)
+		return false;
+	return true;
 }

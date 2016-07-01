@@ -1,3 +1,4 @@
+#pragma execution_character_set ("utf-8")
 #include "cuttime.h"
 
 #include <QFile.h>
@@ -40,14 +41,16 @@ bool cuttime::input(QString fileName)
 
 void cuttime::showEvents()
 {
+	infoLog("----------------------------------------------------------");
+	infoLog("Ê±¼ä´Á:");
 	for (int i = 0; i < m_eventList.size(); i++) {
 		event_t *e = &m_eventList[i];
 		if (i == 0)
-			infoLog(QString("start time: %1").arg(e->time.toString("yyyy-MM-dd hh:mm:ss")));
+			infoLog(QString("Start time: %1").arg(e->time.toString("yyyy-MM-dd hh:mm:ss")));
 		else if (i == m_eventList.size() - 1)
-			infoLog(QString("end time: %1").arg(e->time.toString("yyyy-MM-dd hh:mm:ss")));
+			infoLog(QString("End time: %1").arg(e->time.toString("yyyy-MM-dd hh:mm:ss")));
 		else
-			infoLog(QString("offset: %1, tag: %2").arg(m_eventList[0].time.secsTo(e->time)).arg(e->tag));
+			infoLog(QString("[%1]: Start = %2, Tag = %3").arg(i).arg(m_eventList[0].time.secsTo(e->time)).arg(e->tag));
 	}
 }
 

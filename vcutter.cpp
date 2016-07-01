@@ -20,6 +20,8 @@ extern "C"
 #include "libavutil/file.h"
 }
 
+#define VERSION "0.1"
+
 #define SUBFIX ".mkv"
 #define FILELIST_NAME "./output/filelist"
 
@@ -30,6 +32,10 @@ vcutter::vcutter(QWidget *parent)
 
 	ui.setupUi(this);
 	initLog(ui.logWidget);
+	
+	ui.versionLabel->setText(QString("Version: ") + QString(VERSION));
+
+
 	ui.progressBar->setVisible(false);
 	for (int i = -10; i <= 10; i++)
 		ui.offsetBox->addItem(QString::number(i, 10));

@@ -162,6 +162,7 @@ void vcutter::inputFile()
 	m_videoFile_0 = "";
 	m_videoFile_1 = "";
 	m_inputVideoFile = "";
+	m_needMerge = false;
 
 	QString str = QFileDialog::getOpenFileName(
 			this, "选择事件log文件", m_inDir, "*.log");

@@ -21,7 +21,6 @@ public:
 
 public slots:
 	void clearLog();
-	void getVideoInfo(QString &file);
 	void inputFile();
 	void merge();
 	void split();

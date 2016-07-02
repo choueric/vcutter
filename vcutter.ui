@@ -128,7 +128,7 @@
    <widget class="QLabel" name="versionLabel">
     <property name="geometry">
      <rect>
-      <x>900</x>
+      <x>950</x>
       <y>690</y>
       <width>121</width>
       <height>16</height>

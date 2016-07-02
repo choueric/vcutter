@@ -11,15 +11,6 @@
 #include <QtCore/QIODevice>
 #include <qcolor.h>
 
-extern "C"
-{
-#include <libavformat/avformat.h>
-#include <libavutil/dict.h>
-#include "libavcodec/avcodec.h"
-#include "libavformat/avio.h"
-#include "libavutil/file.h"
-}
-
 #define VERSION "0.1"
 
 #define SUBFIX ".mkv"
@@ -34,7 +25,6 @@ vcutter::vcutter(QWidget *parent)
 	initLog(ui.logWidget);
 	
 	ui.versionLabel->setText(QString("Version: ") + QString(VERSION));
-
 
 	ui.progressBar->setVisible(false);
 	for (int i = -10; i <= 10; i++)
@@ -157,80 +147,6 @@ bool vcutter::checkFileExist(QString file)
 	return true;
 }
 
-void vcutter::getVideoInfo(QString &file)
-{
-    int ret;
-    AVFormatContext *pContext = NULL;
-    AVDictionaryEntry *tag = NULL;
-
-	banner();
-
-    av_register_all();
-
-	pContext = avformat_alloc_context();
-    ret = avformat_open_input(&pContext, file.toLatin1().data(), NULL, NULL);
-	if (ret) {
-		errLog(QString("avformat_open_input错误, ret = %1").arg(ret));
-        return;
-	}
-
-	if (ret = avformat_find_stream_info(pContext, NULL)) {
-		errLog(QString("avformat_find_stream_info错误, ret = %1").arg(ret));
-		return;
-	}
-
-	//infoLog(QString("文件中包哈了[%1]个流").arg(pContext->nb_streams));
-	for (int i = 0; i < pContext->nb_streams; i++) {
-		//infoLog(QString("第[%1]个流的信息:").arg(i));
-		AVStream *pStream = pContext->streams[i];
-
-		AVRational frameRate =pStream->r_frame_rate;  
-		AVRational timeBase = pStream->time_base; 
-		int64_t duration = pStream->duration ; 
-
-		AVCodecContext *pCodecContext = pStream->codec ;
-		AVMediaType avMediaType = pCodecContext->codec_type;
-		AVCodecID codecID = pCodecContext->codec_id ;
-
-		infoLog(QString("视频时长: %1秒").arg(duration * av_q2d(timeBase)));
-		break;
-
-		if (avMediaType == AVMEDIA_TYPE_AUDIO) {
-			infoLog("  类型: 音频");
-#if 0
-			infoLog(QString("  采样率: %1").arg(pCodecContext->sample_rate));
-			infoLog(QString("  通道数为: %1").arg(pCodecContext->channels));
-#endif
-		} else if (avMediaType == AVMEDIA_TYPE_VIDEO) {
-			int videoWidth = pCodecContext->width;
-			int videoHeight = pCodecContext->height;
-			AVSampleFormat sampleFmt = pCodecContext->sample_fmt;
-			infoLog("  类型: 视频");
-#if 0
-			infoLog(QString("  分辨率: %1 x %2 ").arg(videoWidth).arg(videoHeight));
-			infoLog(QString("  帧率为: %1/%2 fps").arg(frameRate.num).arg(frameRate.den));
-#endif
-		}
-#if 0
-		switch(codecID) {
-		case  AV_CODEC_ID_AAC:
-			infoLog("  编码格式: FAAC");
-			break;
-		case  AV_CODEC_ID_H264:
-			infoLog("  编码格式: H264");
-			break;
-		case AV_CODEC_ID_PCM_ALAW:
-			infoLog("  编码格式: PCM ALAW");
-			break;
-		default:
-			infoLog(QString("  编码格式未知: %1").arg(codecID));
-			break;
-		}
-#endif
-	}
-    avformat_close_input(&pContext);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /* slot */
@@ -279,10 +195,6 @@ void vcutter::inputFile()
 	if (m_videoFile_1 != "")
 		warLog(QString("    视频文件2: %1").arg(QFileInfo(m_videoFile_1).fileName()));
 	warLog(QString("    输入的视频文件: %1").arg(m_inputVideoFile));
-
-	getVideoInfo(m_videoFile_0);
-	if (m_videoFile_1 != "")
-		getVideoInfo(m_videoFile_1);
 
 	// parse event_log file.
 	m_cuttime.input(m_eventFile);

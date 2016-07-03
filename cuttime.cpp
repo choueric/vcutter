@@ -100,7 +100,8 @@ int cuttime::getSSArg(int index)
 	return start;
 }
 
-QString cuttime::getOutuptName(int index)
+QString cuttime::getOutuptName(int i)
 {
-	return QString("./output/output_%1.mkv").arg(index);
+	i++;  // the first event in event_list is start
+	return QString("./output/%1_%2.mkv").arg(i).arg(m_eventList[i].tag);
 }

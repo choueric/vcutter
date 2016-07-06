@@ -35,7 +35,7 @@ private:
 	QString m_outDir;
 	QString m_videoFile_0;
 	QString m_videoFile_1;
-	QString m_eventFile;
+	QString m_tagFile;
 	QString m_inputVideoFile;
 
 	QProcess *m_proc;

@@ -158,17 +158,19 @@ void vcutter::clearLog()
 /* slot */
 void vcutter::inputFile()
 {
-	m_eventFile = "";
+	m_tagFile = "";
 	m_videoFile_0 = "";
 	m_videoFile_1 = "";
 	m_inputVideoFile = "";
 	m_needMerge = false;
 
 	QString str = QFileDialog::getOpenFileName(
-			this, "选择事件log文件", m_inDir, "*.log");
+			this, "选择tag文件", m_inDir, "*.log");
 
-	if (str == "")
+	if (str == "") {
+		errLog("没有选择合法的tag文件.");
 		return;
+	}
 
 	QFileInfo file(str);
 	QString prefix = file.absolutePath() + "/" + file.baseName();
@@ -189,16 +191,16 @@ void vcutter::inputFile()
 		m_inputVideoFile = "./output/output.mkv";
 	}
 
-	m_eventFile = str;
+	m_tagFile = str;
 	warLog(QString("选择了 %1").arg(file.baseName()));
-	warLog(QString("    事件文件 : %1").arg(QFileInfo(m_eventFile).fileName()));
+	warLog(QString("    事件文件 : %1").arg(QFileInfo(m_tagFile).fileName()));
 	warLog(QString("    视频文件1: %1").arg(QFileInfo(m_videoFile_0).fileName()));
 	if (m_videoFile_1 != "")
 		warLog(QString("    视频文件2: %1").arg(QFileInfo(m_videoFile_1).fileName()));
 	warLog(QString("    输入的视频文件: %1").arg(m_inputVideoFile));
 
 	// parse event_log file.
-	m_cuttime.input(m_eventFile);
+	m_cuttime.input(m_tagFile);
 	m_cuttime.showEvents();
 
 	enableEditUI();

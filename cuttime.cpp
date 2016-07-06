@@ -28,6 +28,7 @@ bool cuttime::input(QString fileName)
 
 	QTextStream in(&file);
 
+	m_eventList.clear();
 	while (1) {
 		QString line = in.readLine();
 		if (line == "")
@@ -37,7 +38,6 @@ bool cuttime::input(QString fileName)
 
 	return true;
 }
-
 
 void cuttime::showEvents()
 {

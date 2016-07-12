@@ -11,7 +11,7 @@
 #include <QtCore/QIODevice>
 #include <qcolor.h>
 
-#define VERSION  "0.1"
+#define VERSION  "0.2"
 
 #define SUBFIX ".mkv"
 #define FILELIST_NAME "./output/filelist"

@@ -3,6 +3,7 @@
 #include "vcutter.h"
 #include <qmessagebox.h>
 #include "log.h"
+#include "config.h"
 
 #include <QDir.h>
 #include <QFileDialog.h>
@@ -11,10 +12,6 @@
 #include <QtCore/QIODevice>
 #include <qcolor.h>
 
-#define VERSION  "0.2"
-
-#define SUBFIX ".mkv"
-#define FILELIST_NAME "./output/filelist"
 
 vcutter::vcutter(QWidget *parent)
 	: QMainWindow(parent)
@@ -234,6 +231,7 @@ void vcutter::splitOne(int start, int duration, QString output)
 			"-i" << m_inputVideoFile <<
 		    "-ss" << QString::number(start, 10) <<
 		    "-t" << QString::number(duration, 10) <<
+			"-bsf" << "aac_adtstoasc" <<
 		    "-vcodec" << "copy" << "-acodec" << "copy" << output;
 	m_proc->start(m_program, args);
 

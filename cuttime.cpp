@@ -7,7 +7,7 @@
 #include <QtCore/QIODevice>
 
 #include "log.h"
-
+#include "config.h"
 
 cuttime::cuttime()
 {
@@ -103,5 +103,5 @@ int cuttime::getSSArg(int index)
 QString cuttime::getOutuptName(int i)
 {
 	i++;  // the first event in event_list is start
-	return QString("./output/%1_%2.mkv").arg(i).arg(m_eventList[i].tag);
+	return QString("./output/%1_%2%3").arg(i).arg(m_eventList[i].tag).arg(SUBFIX);
 }

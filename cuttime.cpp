@@ -103,5 +103,5 @@ int cuttime::getSSArg(int index)
 QString cuttime::getOutuptName(int i)
 {
 	i++;  // the first event in event_list is start
-	return QString("./output/%1_%2%3").arg(i).arg(m_eventList[i].tag).arg(SUBFIX);
+	return QString("./output/%1_%2"+SUFFIX).arg(i).arg(m_eventList[i].tag);
 }

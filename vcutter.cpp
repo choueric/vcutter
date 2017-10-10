@@ -171,8 +171,8 @@ void vcutter::inputFile()
 
 	QFileInfo file(str);
 	QString prefix = file.absolutePath() + "/" + file.baseName();
-	m_videoFile_0 = prefix + SUBFIX;
-	m_videoFile_1 = prefix + "_1" + SUBFIX;
+	m_videoFile_0 = prefix + SUFFIX;
+	m_videoFile_1 = prefix + "_1" + SUFFIX;
 
 	if (checkFileExist(m_videoFile_0) == false) {
 		m_videoFile_0 = "";
@@ -185,7 +185,7 @@ void vcutter::inputFile()
 		m_videoFile_1 = "";
 	} else {
 		m_needMerge = true;
-		m_inputVideoFile = "./output/output.mkv";
+		m_inputVideoFile = "./output/output" + SUFFIX;
 	}
 
 	m_tagFile = str;

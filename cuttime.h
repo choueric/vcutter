@@ -1,9 +1,9 @@
 #pragma once
 
 #include <qobject.h>
-#include <QString.h>
+#include <qstring.h>
 #include <qlist.h>
-#include <QDateTime.h>
+#include <qdatetime.h>
 
 #define PRE_DUR 3
 #define NEXT_DUR 7

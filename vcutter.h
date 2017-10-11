@@ -1,13 +1,13 @@
 #ifndef VCUTTER_H
 #define VCUTTER_H
 
-#include <Windows.h>
 #include <QtWidgets/QMainWindow>
-#include <QString.h>
+#include <qstring.h>
 #include <qtimer.h>
 #include <qprocess.h>
 #include "ui_vcutter.h"
 
+#include "config.h"
 #include "cuttime.h"
 
 

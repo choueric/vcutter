@@ -1,7 +1,7 @@
 #pragma execution_character_set ("utf-8")
 #include "cuttime.h"
 
-#include <QFile.h>
+#include <qfile.h>
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
 #include <QtCore/QIODevice>

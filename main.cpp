@@ -1,6 +1,7 @@
 #include "vcutter.h"
 #include <QtWidgets/QApplication>
-#include "Windows.h"
+
+#include "config.h"
 
 //#define DEBUG_CONSOLE
 

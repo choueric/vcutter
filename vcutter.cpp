@@ -5,8 +5,8 @@
 #include "log.h"
 #include "config.h"
 
-#include <QDir.h>
-#include <QFileDialog.h>
+#include <qdir.h>
+#include <qfiledialog.h>
 #include <QtCore/QTextStream>
 #include <QtCore/QFile>
 #include <QtCore/QIODevice>
